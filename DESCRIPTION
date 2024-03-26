@@ -23,7 +23,7 @@ Suggests: asciicast, debugme, knitr, pillar, rmarkdown, testthat (>=
         3.0.0), webfakes
 Encoding: UTF-8
 NeedsCompilation: no
-Packaged: 2024-03-26 14:15:55 UTC; gaborcsardi
+Packaged: 2024-03-26 15:04:53 UTC; gaborcsardi
 Author: Gábor Csárdi [aut, cre],
   Maëlle Salmon [aut] (<https://orcid.org/0000-0002-2815-0399>),
   R Consortium [fnd]
