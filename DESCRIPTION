@@ -19,11 +19,12 @@ Depends: R (>= 4.0)
 Imports: callr, cli, curl, desc, gert, glue, gitcreds, jsonlite,
         pkgbuild, processx, rappdirs, rematch, R6, rprojroot, utils,
         whoami
-Suggests: asciicast, debugme, knitr, pillar, rmarkdown, testthat (>=
-        3.0.0), webfakes
+Suggests: asciicast, debugme, knitr, mockery, pillar, rmarkdown,
+        testthat (>= 3.0.0), webfakes, withr
 Encoding: UTF-8
+Config/testthat/edition: 3
 NeedsCompilation: no
-Packaged: 2024-03-30 11:03:08 UTC; gaborcsardi
+Packaged: 2024-04-08 14:30:04 UTC; gaborcsardi
 Author: Gábor Csárdi [aut, cre],
   Maëlle Salmon [aut] (<https://orcid.org/0000-0002-2815-0399>),
   R Consortium [fnd]

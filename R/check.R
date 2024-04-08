@@ -18,7 +18,7 @@ rhub_check <- function(gh_url = NULL, platforms = NULL, r_versions = NULL,
                        branch = NULL) {
   assert_that(
     is_optional_gh_url(gh_url),
-    is.null(platforms) || is_character(platforms),
+    is_optional_character(platforms),
     is_optional_string(branch)
   )
 
@@ -35,7 +35,7 @@ rhub_check <- function(gh_url = NULL, platforms = NULL, r_versions = NULL,
     }
   }
 
-  platforms <- select_platforms()
+  platforms <- select_platforms(platforms)
 
   url <- parse_gh_url(gh_url)
   ep <- glue::glue("/repos/{url$user}/{url$repo}/actions/workflows/rhub.yaml/dispatches")
