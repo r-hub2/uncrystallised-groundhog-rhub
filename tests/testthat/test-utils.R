@@ -220,7 +220,3 @@ test_that("is_dir", {
   expect_true(is_dir(tempdir()))
   expect_false(is_dir(tmp))
 })
-
-test_that("parse_email", {
-
-})

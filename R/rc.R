@@ -41,7 +41,7 @@ rc_new_token <- function(email = NULL, token = NULL) {
   }
 
   email_add_token(email, token)
-  cli::cli_alert_success("Added token for {.val email}.", wrap = TRUE)
+  cli::cli_alert_success("Added token for {.val {email}}.", wrap = TRUE)
   cli::cli_alert_info("R-hub tokens are stored at {.path {email_file()}}.")
   invisible()
 }
@@ -117,7 +117,7 @@ rc_list_repos <- function(email = NULL) {
 rc_submit <- function(path = ".", platforms = NULL, email = NULL,
                       confirmation = NULL) {
 
-  if (isTRUE(confirmation) && !is_interactive()) {
+  if (!isTRUE(confirmation) && !is_interactive()) {
     throw(pkg_error(
       "You need to set {.arg confirmation} to {.val TRUE}
        to submit packages to R-hub from non-interactive R sessions."
@@ -137,7 +137,7 @@ rc_submit <- function(path = ".", platforms = NULL, email = NULL,
 
   email <- email %||% get_maintainer_email(path = path)
 
-  platforms <- select_platforms()
+  platforms <- select_platforms(platforms)
 
   if (is_dir(path))  {
     path <- pkgbuild::build(path = path)
@@ -184,6 +184,7 @@ rc_submit <- function(path = ".", platforms = NULL, email = NULL,
     )
   )
 
+  browser()
   resevt <- Filter(function(x) x[["event"]] == "result", resp$sse)
   if (length(resevt) == 0) {
     stop("Invalid response from R-hub server, please report this.")
@@ -201,7 +202,6 @@ rc_submit <- function(path = ".", platforms = NULL, email = NULL,
 # =========================================================================
 
 guess_email <- function(path = ".", message = TRUE) {
-  valid <- list_validated_emails2(message = FALSE)
   maint <- tryCatch(get_maintainer_email(path), error = function(e) NULL)
   if (!is.null(maint)) {
     if (message) {
@@ -246,7 +246,7 @@ get_email_to_validate <- function(path) {
   ## maintainer address, if any.
 
   valid <- list_validated_emails2(msg_if_empty = FALSE)
-  guess <- email_address()
+  guess <- tryCatch(email_address(), error = function(e) NULL)
   maint <- tryCatch(get_maintainer_email(path), error = function(e) NULL)
 
   choices <- rbind(
@@ -292,6 +292,8 @@ get_email_to_validate <- function(path) {
   } else {
     email <- choices$email[ch]
   }
+
+  email
 }
 
 list_validated_emails2 <- function(message = is_interactive(),
@@ -303,11 +305,8 @@ list_validated_emails2 <- function(message = is_interactive(),
         "R-hub tokens are stored at {.path {email_file()}}."
       )
     }
+    read_token_file(file)
 
-    structure(
-      read.csv(file, stringsAsFactors = FALSE, header = FALSE),
-      names = c("email", "token")
-    )
   } else {
     data.frame(
       email = character(),
@@ -332,7 +331,7 @@ email_file <- function() {
   file.path(rhub_data_dir, "validated_emails.csv")
 }
 
-rc_new_token_interactive <- function(email, token, path = ".") {
+rc_new_token_interactive <- function(email = NULL, token = NULL, path = ".") {
 
   if (is.null(email)) email <- get_email_to_validate(path)
 
@@ -379,13 +378,24 @@ email_add_token <- function(email, token) {
     tokens[match(email, tokens[,1]), 2] <- token
   }
 
+  write_token_file(tokens, file)
+
+  invisible()
+}
+
+read_token_file <- function(path) {
+  structure(
+    read.csv(path, stringsAsFactors = FALSE, header = FALSE),
+    names = c("email", "token")
+  )
+}
+
+write_token_file <- function(tokens, path) {
   write.table(
     tokens,
-    file = file,
+    file = path,
     sep = ",",
     col.names = FALSE,
     row.names = FALSE
   )
-
-  invisible()
 }
