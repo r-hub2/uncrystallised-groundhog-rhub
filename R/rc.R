@@ -124,16 +124,18 @@ rc_submit <- function(path = ".", platforms = NULL, email = NULL,
     ))
   }
 
-  pkg_name <- desc::desc_get("Package", file = path)[[1]]
-  if (is.na(pkg_name)) {
+  tryCatch({
+    pkg_name <- suppressWarnings(desc::desc_get("Package", file = path)[[1]])
+    if (is.na(pkg_name)) stop()
+  }, error = function(e) {
     throw(pkg_error(
       "Could not query R package name at {.path {path}}.",
       i = paste(
         "Make sure that {.arg path} is an R package or a directory",
-        "contaiing an R package."
+        "containing an R package."
       )
     ))
-  }
+  })
 
   email <- email %||% get_maintainer_email(path = path)
 
@@ -184,7 +186,6 @@ rc_submit <- function(path = ".", platforms = NULL, email = NULL,
     )
   )
 
-  browser()
   resevt <- Filter(function(x) x[["event"]] == "result", resp$sse)
   if (length(resevt) == 0) {
     stop("Invalid response from R-hub server, please report this.")
@@ -209,8 +210,8 @@ guess_email <- function(path = ".", message = TRUE) {
         wrap = TRUE,
         "Using maintainer email address {.val {maint}}."
       )
-      return(maint)
     }
+    return(maint)
   }
 
   guess <- email_address()

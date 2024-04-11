@@ -55,7 +55,70 @@ test_that("rc_submit", {
     rc_submit()
   })
 
-  pkg <- test_path("fixtures/")
+  mockery::stub(rc_submit, "select_platforms", c("linux", "clang18"))
+  mockery::stub(rc_submit, "random_id", "kleptomaniac-harlequinbug")
+  resp <- readRDS(test_path("fixtures/rc-response-submit.rds"))
+  mockery::stub(rc_submit, "query", resp)
+  mockery::stub(rc_submit, "get_auth_header", c("Authorization" = "Bearer token"))
+  pkg <- test_path("fixtures/pkg_0.0.0.9000.tar.gz")
+
+  expect_snapshot({
+    rc_submit(pkg, confirmation = TRUE)
+    (rc_submit(pkg, confirmation = TRUE))
+  })
+
+  # confirmation, abort
+  withr::local_options(rlib_interactive = TRUE)
+  ans <- "no"
+  mockery::stub(rc_submit, "readline", function(prompt) {
+    cat(prompt)
+    cat(ans)
+    ans
+  })
+  expect_snapshot(error = TRUE, {
+    (rc_submit(pkg))
+  })
+
+  # confirmation, yes
+  ans <- "yes"
+  expect_snapshot({
+    (rc_submit(pkg))
+  })
+
+  # bad package file
+  pkg <- test_path("fixtures/bad.tar.gz")
+  expect_snapshot(error = TRUE, {
+    rc_submit(pkg)
+  })
+
+  # need to build if directory
+  withr::local_options(useFancyQuotes = FALSE)
+  tmp <- tempfile()
+  on.exit(unlink(tmp, recursive = TRUE), add = TRUE)
+  dir.create(tmp)
+  file.copy(test_path("fixtures/pkg"), tmp, recursive = TRUE)
+  pkg <- file.path(tmp, "pkg")
+  expect_snapshot({
+    (rc_submit(pkg))
+  }, transform = function(x) {
+    x <- sub(
+      "checking for file .*[.][.][.]",
+      "checking for file '<path> ...",
+      x
+    )
+    x <- gsub("\x91", "'", x, fixed = TRUE, useBytes = TRUE)
+    x <- gsub("\x92", "'", x, fixed = TRUE, useBytes = TRUE)
+    x <- gsub("\xe2\x80\x98", "'", x, fixed = TRUE, useBytes = TRUE)
+    x <- gsub("\xe2\x80\x99", "'", x, fixed = TRUE, useBytes = TRUE)
+    x
+  })
+
+  # error response
+  mockery::stub(rc_submit, "query", list())
+  pkg <- test_path("fixtures/pkg_0.0.0.9000.tar.gz")
+  expect_snapshot(error = TRUE, {
+    (rc_submit(pkg))
+  })
 })
 
 # == Internals ============================================================
@@ -169,22 +232,28 @@ test_that("rc_new_token_interactive", {
   expect_snapshot({
     rc_new_token_interactive(email = "maint@example.com")
   })
+
+  mockery::stub(rc_new_token_interactive, "get_email_to_validate", "user@example.com")
+  expect_snapshot({
+    rc_new_token_interactive()
+  })
 })
 
 test_that("email_add_token", {
   tmp <- tempfile()
+  ef <- file.path(tmp, "emails.csv")
   on.exit(unlink(tmp), add = TRUE)
 
   # file does not exist yet
-  mockery::stub(email_add_token, "email_file", tmp)
+  mockery::stub(email_add_token, "email_file", ef)
   email_add_token("newemail@example.com", "new-token")
-  expect_snapshot(read_token_file(tmp))
+  expect_snapshot(read_token_file(ef))
 
   # file exists already, append
   email_add_token("newemail2@example.com", "new-token2")
-  expect_snapshot(read_token_file(tmp))
+  expect_snapshot(read_token_file(ef))
 
   # file exists already, replace
   email_add_token("newemail@example.com", "new-new-token")
-  expect_snapshot(read_token_file(tmp))
+  expect_snapshot(read_token_file(ef))
 })

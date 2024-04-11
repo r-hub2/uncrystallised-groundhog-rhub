@@ -53,6 +53,151 @@
       Error:
       ! You need to set `confirmation` to "TRUE" to submit packages to R-hub from non-interactive R sessions.
 
+---
+
+    Code
+      rc_submit(pkg, confirmation = TRUE)
+      (rc_submit(pkg, confirmation = TRUE))
+    Output
+      $result
+      [1] "OK"
+      
+      $repo_url
+      [1] "https://github.com/r-hub2/uncrystallised-groundhog-rhub"
+      
+      $actions_url
+      [1] "https://github.com/r-hub2/uncrystallised-groundhog-rhub/actions"
+      
+      $id
+      [1] "eonian-crustacean"
+      
+      $name
+      [1] "linux,clang18"
+      
+
+---
+
+    Code
+      (rc_submit(pkg))
+    Output
+      -- Confirmation ----------------------------------------------------------------
+    Message
+      ! Your package will be publicly readable at <https://github.com/r-hub2>.
+      > You will need a GitHub account to view the build logs.
+      > Only continue if you are fine with this.
+      > See the `rhub_setup()` function for an alternative way of using R-hub.
+    Output
+      
+      Please type 'yes' to continue: no
+    Message
+      
+    Condition
+      Error:
+      ! Aborted R-hub submission.
+
+---
+
+    Code
+      (rc_submit(pkg))
+    Output
+      -- Confirmation ----------------------------------------------------------------
+    Message
+      ! Your package will be publicly readable at <https://github.com/r-hub2>.
+      > You will need a GitHub account to view the build logs.
+      > Only continue if you are fine with this.
+      > See the `rhub_setup()` function for an alternative way of using R-hub.
+    Output
+      
+      Please type 'yes' to continue: yes
+    Message
+      
+    Output
+      $result
+      [1] "OK"
+      
+      $repo_url
+      [1] "https://github.com/r-hub2/uncrystallised-groundhog-rhub"
+      
+      $actions_url
+      [1] "https://github.com/r-hub2/uncrystallised-groundhog-rhub/actions"
+      
+      $id
+      [1] "eonian-crustacean"
+      
+      $name
+      [1] "linux,clang18"
+      
+
+---
+
+    Code
+      rc_submit(pkg)
+    Condition
+      Error:
+      ! Could not query R package name at 'fixtures/bad.tar.gz'.
+      i Make sure that `path` is an R package or a directory containing an R package.
+
+---
+
+    Code
+      (rc_submit(pkg))
+    Output
+      -- R CMD build -----------------------------------------------------------------
+      * checking for file '<path> ... OK
+      * preparing 'pkg':
+      * checking DESCRIPTION meta-information ... OK
+      * checking for LF line-endings in source and make files and shell scripts
+      * checking for empty or unneeded directories
+      * building 'pkg_0.0.0.9000.tar.gz'
+      
+      -- Confirmation ----------------------------------------------------------------
+    Message
+      ! Your package will be publicly readable at <https://github.com/r-hub2>.
+      > You will need a GitHub account to view the build logs.
+      > Only continue if you are fine with this.
+      > See the `rhub_setup()` function for an alternative way of using R-hub.
+    Output
+      
+      Please type 'yes' to continue: yes
+    Message
+      
+    Output
+      $result
+      [1] "OK"
+      
+      $repo_url
+      [1] "https://github.com/r-hub2/uncrystallised-groundhog-rhub"
+      
+      $actions_url
+      [1] "https://github.com/r-hub2/uncrystallised-groundhog-rhub/actions"
+      
+      $id
+      [1] "eonian-crustacean"
+      
+      $name
+      [1] "linux,clang18"
+      
+
+---
+
+    Code
+      (rc_submit(pkg))
+    Output
+      -- Confirmation ----------------------------------------------------------------
+    Message
+      ! Your package will be publicly readable at <https://github.com/r-hub2>.
+      > You will need a GitHub account to view the build logs.
+      > Only continue if you are fine with this.
+      > See the `rhub_setup()` function for an alternative way of using R-hub.
+    Output
+      
+      Please type 'yes' to continue: yes
+    Message
+      
+    Condition
+      Error:
+      ! Invalid response from R-hub server, please report this.
+
 # guess_email
 
     Code
@@ -64,7 +209,7 @@
     Code
       guess_email(message = FALSE)
     Output
-      [1] "csardi.gabor@gmail.com"
+      [1] "user@example.com"
 
 ---
 
@@ -218,10 +363,24 @@
       [1] "token"
       
 
+---
+
+    Code
+      rc_new_token_interactive()
+    Message
+      i Please check your emails for the R-hub access token.
+    Output
+      [[1]]
+      [1] "user@example.com"
+      
+      [[2]]
+      [1] "token"
+      
+
 # email_add_token
 
     Code
-      read_token_file(tmp)
+      read_token_file(ef)
     Output
                        email     token
       1 newemail@example.com new-token
@@ -229,7 +388,7 @@
 ---
 
     Code
-      read_token_file(tmp)
+      read_token_file(ef)
     Output
                         email      token
       1  newemail@example.com  new-token
@@ -238,7 +397,7 @@
 ---
 
     Code
-      read_token_file(tmp)
+      read_token_file(ef)
     Output
                         email         token
       1  newemail@example.com new-new-token
